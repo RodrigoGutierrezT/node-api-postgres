@@ -28,16 +28,18 @@ const getUserById = (req, res) => {
     })
 }
 
-const createUser = (req, res) => {
-    const { name, email } = req.body
+const createUser = (request, response) => {
+    const { name, email } = request.body
   
-    pool.query('INSERT INTO users (name, email) VALUES ($1, $2)', [name, email], (error, results) => {
+    pool.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [name, email], (error, results) => {
       if (error) {
         throw error
+      } else if (!Array.isArray(results.rows) || results.rows.length < 1) {
+          throw error
       }
-      res.status(201).send(`User added with ID: ${result.insertId}`)
+      response.status(201).send(`User added with ID: ${results.rows[0].id}`)
     })
-}
+  }
 
 const updateUser = (request, response) => {
     const id = parseInt(request.params.id)
